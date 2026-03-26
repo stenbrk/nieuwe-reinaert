@@ -250,6 +250,39 @@ let baseSpeed;
 let playerSpeedMultiplier = 1;
 let particles = [];
 
+
+
+let ownedItems = {
+  basic: true // deze heb je standaard
+};
+
+let selectedSkin = "basic";
+
+const shopItemsData = [
+  {
+    id: "basic",
+    name: "basic",
+    price: 0,
+    type: "skin",
+    emoji: "🦊"
+  },
+  {
+    id: "kingfox",
+    name: "Koningvos",
+    price: 250,
+    type: "skin",
+    emoji: "👑"
+  },
+  {
+    id: "nightfox",
+    name: "ghostvos",
+    price: 150,
+    type: "skin",
+    emoji: "👻"
+  }
+];
+
+
 function openSettings() {
   document.getElementById("settingsOverlay").style.display = "flex";
 }
@@ -305,14 +338,16 @@ function updateShop() {
 
   const skinsDiv = document.getElementById("skinsRow");
   const powerupsDiv = document.getElementById("powerupsRow");
+
   skinsDiv.innerHTML = "";
   powerupsDiv.innerHTML = "";
 
   shopItemsData.forEach(item => {
     const btn = document.createElement("div");
+
     btn.style.padding = "10px";
-    btn.style.width = "80px";
-    btn.style.height = "100px";
+    btn.style.width = "90px";
+    btn.style.height = "120px";
     btn.style.border = "2px solid white";
     btn.style.borderRadius = "10px";
     btn.style.display = "flex";
@@ -321,14 +356,16 @@ function updateShop() {
     btn.style.justifyContent = "center";
     btn.style.cursor = "pointer";
     btn.style.transition = "0.2s";
+
     btn.onmouseover = () => btn.style.transform = "scale(1.1)";
     btn.onmouseout = () => btn.style.transform = "scale(1)";
 
-    if (ownedItems[item.id]) {
-      btn.style.opacity = "0.6";
+    // geselecteerde skin highlight
+    if (selectedSkin === item.id) {
+      btn.style.border = "3px solid gold";
     }
 
-    // Skin: toon emoji + prijs
+    // skin emoji
     if (item.type === "skin") {
       const emojiDiv = document.createElement("div");
       emojiDiv.style.fontSize = "40px";
@@ -336,21 +373,55 @@ function updateShop() {
       btn.appendChild(emojiDiv);
     }
 
+    // naam
     const nameDiv = document.createElement("div");
     nameDiv.style.fontSize = "14px";
     nameDiv.style.marginTop = "5px";
     nameDiv.innerText = item.name;
     btn.appendChild(nameDiv);
 
-    const priceDiv = document.createElement("div");
-    priceDiv.style.fontSize = "12px";
-    priceDiv.innerText = ownedItems[item.id] ? "✅" : item.price + " 🐤";
-    btn.appendChild(priceDiv);
+    // ALS JE HEM HEBT
+    if (ownedItems[item.id]) {
 
+      if (selectedSkin === item.id) {
+        const selectedText = document.createElement("div");
+        selectedText.innerText = "🎯 Selected";
+        selectedText.style.fontSize = "12px";
+        selectedText.style.marginTop = "5px";
+        btn.appendChild(selectedText);
+      } else {
+        const selectBtn = document.createElement("button");
+        selectBtn.innerText = "Select";
+        selectBtn.style.fontSize = "12px";
+        selectBtn.style.marginTop = "5px";
+
+        selectBtn.onclick = (e) => {
+          e.stopPropagation(); // voorkomt kopen
+          selectedSkin = item.id;
+          updateShop();
+        };
+
+        btn.appendChild(selectBtn);
+      }
+
+    } else {
+      // prijs tonen
+      const priceDiv = document.createElement("div");
+      priceDiv.style.fontSize = "12px";
+      priceDiv.style.marginTop = "5px";
+      priceDiv.innerText = item.price + " 🐤";
+      btn.appendChild(priceDiv);
+    }
+
+    // kopen door op item te klikken
     btn.onclick = () => buyItem(item);
 
-    if (item.type === "skin") skinsDiv.appendChild(btn);
-    else powerupsDiv.appendChild(btn);
+    // juiste sectie
+    if (item.type === "skin") {
+      skinsDiv.appendChild(btn);
+    } else {
+      powerupsDiv.appendChild(btn);
+    }
   });
 }
 
@@ -763,25 +834,69 @@ particles = particles.filter(p => p.life > 0);
 function draw() {
   ctx.fillStyle = "#022c22";
   ctx.fillRect(0,0,400,400);
-
-// PLAYER 1 🦊 (Reinaert)
+  
+  // PLAYER 1 🦊 (Reinaert)
 if (player) {
   ctx.save();
 
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
-  // naam boven de vos
-  ctx.fillStyle = "#FF8C00";
-  ctx.font = "14px Arial";
-  ctx.fillText("Reinaert", player.x, player.y - 24);
 
   // de vos zelf
   ctx.font = "32px Arial";
   ctx.shadowBlur = 15;
 ctx.shadowColor = "#fa4402";
+
+
+// SKINS
+if (selectedSkin === "basic") {
+  ctx.shadowColor = "#fa4402";
+  ctx.shadowBlur = 15;
+  ctx.fillText("🦊", player.x, player.y);
+  
+  ctx.fillStyle = "#FF8C00";
+  ctx.font = "14px Arial";
+  ctx.fillText("Reinaert", player.x, player.y - 24);
+}
+
+else if (selectedSkin === "kingfox") {
+  // gouden glow
+  ctx.shadowColor = "gold";
+  ctx.shadowBlur = 20;
+
+  
+
+  // vos
+  ctx.font = "32px Arial";
+  ctx.fillText("🦊", player.x, player.y);
+  
+  // kroon
+  ctx.font = "20px Arial";
+  ctx.fillText("👑", player.x, player.y - 15);
+  
+  ctx.fillStyle = "#FF8C00";
+  ctx.font = "14px Arial";
+  ctx.fillText("Reinaert", player.x, player.y - 34);
+}
+
+else if (selectedSkin === "nightfox") {
+  ctx.shadowColor = "black";
+ctx.shadowBlur = 25;
+
+ctx.globalAlpha = 0.35; // maakt hem donkerder
 ctx.fillText("🦊", player.x, player.y);
+ctx.globalAlpha = 8;
+
+ctx.fillStyle = "#FF8C00";
+  ctx.font = "14px Arial";
+  ctx.fillText("Reinaert", player.x, player.y - 24);
+
+  ctx.fillStyle = "white"; // reset voor andere dingen
+}
+
 ctx.shadowBlur = 0;
+
 
   ctx.restore();
 
@@ -1000,43 +1115,6 @@ else ctx.shadowColor = "red";
   ctx.shadowBlur = 0;
   ctx.restore();
 }
-
-function updateShop() {
-  const shopDiv = document.getElementById("shopItems");
-  shopDiv.innerHTML = "";
-
-  document.getElementById("coinsDisplay").innerText = "🐤: " + coins;
-
-  shopItemsData.forEach(item => {
-    const btn = document.createElement("button");
-    btn.style.padding = "10px";
-    btn.style.margin = "5px";
-    btn.style.width = "150px";
-
-    if (ownedItems[item.id]) {
-      btn.innerText = item.name + " ✅";
-      btn.disabled = true;
-    } else {
-      btn.innerText = `${item.name} - ${item.price} 🐤`;
-      btn.onclick = () => buyItem(item);
-    }
-
-    shopDiv.appendChild(btn);
-  });
-}
-
-function buyItem(item) {
-  if (coins >= item.price) {
-    coins -= item.price;
-    ownedItems[item.id] = true;
-    updateShop();
-    playBeep(800, 0.2, "square", 0.2); // geluid bij aankoop
-  } else {
-    alert("Niet genoeg 🐤!");
-    playBeep(200, 0.2, "sawtooth", 0.2); // fout-geluid
-  }
-}
-
 }
 
 
