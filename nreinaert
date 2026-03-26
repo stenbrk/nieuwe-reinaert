@@ -149,6 +149,27 @@ button:hover {
   <button onclick="closeSettings()">Back</button>
 </div>
 
+<div id="shopOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+background: rgba(0,0,0,0.95); display:flex; flex-direction:column; justify-content:center; align-items:center; color:white; text-align:center;">
+
+  <h1>Shop</h1>
+  <div id="coinsDisplay">🐤: 0</div>
+
+  <!-- Skins sectie -->
+  <h3 style="margin-top:20px;">Skins</h3>
+  <div id="skinsRow" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
+    <!-- skins buttons worden hier via JS toegevoegd -->
+  </div>
+
+  <!-- Power-ups sectie -->
+  <h3 style="margin-top:30px;">Trails</h3>
+  <div id="powerupsRow" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
+    <!-- power-up buttons worden hier via JS toegevoegd -->
+  </div>
+
+  <button onclick="closeShop()" style="margin-top:30px; font-size:14px; padding:3px 10px;">Terug</button>
+</div>
+
 
   <div id="menuButtons">
     <button id="settingsBtn">Settings</button>
@@ -267,6 +288,85 @@ document.getElementById("volumeSlider").oninput = (e) => {
 document.getElementById("playerMode").onchange = (e) => {
   playerMode = e.target.value;
 };
+
+document.getElementById("shopBtn").onclick = () => openShop();
+
+function openShop() {
+  document.getElementById("shopOverlay").style.display = "flex";
+  updateShop();
+}
+
+function closeShop() {
+  document.getElementById("shopOverlay").style.display = "none";
+}
+
+function updateShop() {
+  document.getElementById("coinsDisplay").innerText = "🐤: " + coins;
+
+  const skinsDiv = document.getElementById("skinsRow");
+  const powerupsDiv = document.getElementById("powerupsRow");
+  skinsDiv.innerHTML = "";
+  powerupsDiv.innerHTML = "";
+
+  shopItemsData.forEach(item => {
+    const btn = document.createElement("div");
+    btn.style.padding = "10px";
+    btn.style.width = "80px";
+    btn.style.height = "100px";
+    btn.style.border = "2px solid white";
+    btn.style.borderRadius = "10px";
+    btn.style.display = "flex";
+    btn.style.flexDirection = "column";
+    btn.style.alignItems = "center";
+    btn.style.justifyContent = "center";
+    btn.style.cursor = "pointer";
+    btn.style.transition = "0.2s";
+    btn.onmouseover = () => btn.style.transform = "scale(1.1)";
+    btn.onmouseout = () => btn.style.transform = "scale(1)";
+
+    if (ownedItems[item.id]) {
+      btn.style.opacity = "0.6";
+    }
+
+    // Skin: toon emoji + prijs
+    if (item.type === "skin") {
+      const emojiDiv = document.createElement("div");
+      emojiDiv.style.fontSize = "40px";
+      emojiDiv.innerText = item.emoji;
+      btn.appendChild(emojiDiv);
+    }
+
+    const nameDiv = document.createElement("div");
+    nameDiv.style.fontSize = "14px";
+    nameDiv.style.marginTop = "5px";
+    nameDiv.innerText = item.name;
+    btn.appendChild(nameDiv);
+
+    const priceDiv = document.createElement("div");
+    priceDiv.style.fontSize = "12px";
+    priceDiv.innerText = ownedItems[item.id] ? "✅" : item.price + " 🐤";
+    btn.appendChild(priceDiv);
+
+    btn.onclick = () => buyItem(item);
+
+    if (item.type === "skin") skinsDiv.appendChild(btn);
+    else powerupsDiv.appendChild(btn);
+  });
+}
+
+function buyItem(item) {
+  if (ownedItems[item.id]) return;
+
+  if (coins >= item.price) {
+    coins -= item.price;
+    ownedItems[item.id] = true;
+    updateShop();
+    playBeep(800, 0.2, "square", 0.2);
+  } else {
+    alert("Niet genoeg 🐤!");
+    playBeep(200, 0.2, "sawtooth", 0.2);
+  }
+}
 
 
 function startGame() {
@@ -899,6 +999,42 @@ else ctx.shadowColor = "red";
 
   ctx.shadowBlur = 0;
   ctx.restore();
+}
+
+function updateShop() {
+  const shopDiv = document.getElementById("shopItems");
+  shopDiv.innerHTML = "";
+
+  document.getElementById("coinsDisplay").innerText = "🐤: " + coins;
+
+  shopItemsData.forEach(item => {
+    const btn = document.createElement("button");
+    btn.style.padding = "10px";
+    btn.style.margin = "5px";
+    btn.style.width = "150px";
+
+    if (ownedItems[item.id]) {
+      btn.innerText = item.name + " ✅";
+      btn.disabled = true;
+    } else {
+      btn.innerText = `${item.name} - ${item.price} 🐤`;
+      btn.onclick = () => buyItem(item);
+    }
+
+    shopDiv.appendChild(btn);
+  });
+}
+
+function buyItem(item) {
+  if (coins >= item.price) {
+    coins -= item.price;
+    ownedItems[item.id] = true;
+    updateShop();
+    playBeep(800, 0.2, "square", 0.2); // geluid bij aankoop
+  } else {
+    alert("Niet genoeg 🐤!");
+    playBeep(200, 0.2, "sawtooth", 0.2); // fout-geluid
+  }
 }
 
 }
