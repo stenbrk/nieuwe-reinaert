@@ -259,28 +259,58 @@ let ownedItems = {
 let selectedSkin = "basic";
 
 const shopItemsData = [
-  {
-    id: "basic",
-    name: "basic",
-    price: 0,
-    type: "skin",
-    emoji: "🦊"
-  },
-  {
-    id: "kingfox",
-    name: "Koningvos",
-    price: 250,
-    type: "skin",
-    emoji: "👑"
-  },
-  {
-    id: "nightfox",
-    name: "ghostvos",
-    price: 150,
-    type: "skin",
-    emoji: "👻"
-  }
+  { id: "basic", name: "basic", price: 0, type: "skin", emoji: "🦊" },
+  { id: "kingfox", name: "Koningvos", price: 250, type: "skin", emoji: "👑" },
+  { id: "nightfox", name: "ghostvos", price: 150, type: "skin", emoji: "👻" }
 ];
+  
+  
+  function drawSkinPreview(ctx, skin) {
+  ctx.clearRect(0, 0, 60, 60);
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const x = 30;
+  const y = 35;
+
+  // 🦊 BASIC
+  if (skin === "basic") {
+    ctx.font = "28px Arial";
+    ctx.shadowColor = "#fa4402";
+    ctx.shadowBlur = 10;
+    ctx.fillText("🦊", x, y);
+  }
+
+  // 👑 KINGFOX
+  else if (skin === "kingfox") {
+    ctx.shadowColor = "gold";
+    ctx.shadowBlur = 15;
+
+    ctx.font = "28px Arial";
+    ctx.fillText("🦊", x, y);
+
+    // kroon boven hoofd
+    ctx.font = "16px Arial";
+    ctx.fillText("👑", x, y - 14);
+  }
+
+  // 👻 NIGHTFOX (ghost)
+  else if (skin === "nightfox") {
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 20;
+
+    ctx.globalAlpha = 0.35;  // maakt hem doorzichtig
+    ctx.font = "28px Arial";
+    ctx.fillText("🦊", x, y);
+
+    ctx.globalAlpha = 1; // reset opacity
+  }
+
+  // reset shadow blur
+  ctx.shadowBlur = 0;
+}
+ 
 
 
 function openSettings() {
@@ -365,13 +395,49 @@ function updateShop() {
       btn.style.border = "3px solid gold";
     }
 
-    // skin emoji
     if (item.type === "skin") {
-      const emojiDiv = document.createElement("div");
-      emojiDiv.style.fontSize = "40px";
-      emojiDiv.innerText = item.emoji;
-      btn.appendChild(emojiDiv);
-    }
+  const previewDiv = document.createElement("div");
+previewDiv.style.fontSize = "50px"; // vos emoji groot
+previewDiv.style.lineHeight = "1";
+previewDiv.style.textAlign = "center";
+previewDiv.style.height = "70px"; 
+previewDiv.style.display = "flex";
+previewDiv.style.flexDirection = "column";
+previewDiv.style.alignItems = "center";
+previewDiv.style.justifyContent = "flex-end"; // vos onderin, kroon boven
+
+// Voordat we de emoji plaatsen, maken we een "wrapper" voor de kroon
+if(item.id === "basic") {
+    previewDiv.innerText = "🦊";
+} 
+else if(item.id === "kingfox") {
+    // kroon boven de vos
+    
+    previewDiv.style.position = "relative";
+    previewDiv.style.top = "-33px"; // verschuif alles 10px omhoog
+    
+    const foxDiv = document.createElement("div");
+    foxDiv.innerText = "🦊";
+    foxDiv.style.fontSize = "50px";
+    foxDiv.style.textShadow = "0 0 15px gold";
+    previewDiv.appendChild(foxDiv);
+
+    // dan de kroon boven de vos, zodat hij ervoor zit
+    const crownDiv = document.createElement("div");
+    crownDiv.innerText = "👑";
+    crownDiv.style.fontSize = "30px";
+    crownDiv.style.marginTop = "-65px"; // overlap met hoofd
+    crownDiv.style.textShadow = "0 0 15px gold";
+    previewDiv.appendChild(crownDiv);
+    
+} 
+else if(item.id === "nightfox") {
+    previewDiv.innerText = "🦊";
+    previewDiv.style.opacity = "0.35"; // ghost effect
+}
+
+btn.appendChild(previewDiv);
+}
 
     // naam
     const nameDiv = document.createElement("div");
@@ -624,7 +690,7 @@ if (shieldActive) {
   if (coinMultiplierTimer <= 0) coinMultiplierActive = false;
 }
 
-  let accel = 0.8;
+  let accel = 0.7;
   
   let baseSpeed;
   baseSpeed = (gameMode === "hard" ? 8 : 4) * playerSpeedMultiplier;
@@ -1114,6 +1180,48 @@ else ctx.shadowColor = "red";
 
   ctx.shadowBlur = 0;
   ctx.restore();
+}
+
+function drawSkinPreview(ctx, skin) {
+  ctx.clearRect(0, 0, 60, 60);
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  const x = 30;
+  const y = 35;
+
+  ctx.font = "28px Arial";
+
+  // 🦊 BASIC
+  if (skin === "basic") {
+    ctx.shadowColor = "#fa4402";
+    ctx.shadowBlur = 10;
+    ctx.fillText("🦊", x, y);
+  }
+
+  // 👑 KINGFOX
+  else if (skin === "kingfox") {
+    ctx.shadowColor = "gold";
+    ctx.shadowBlur = 15;
+
+    ctx.fillText("🦊", x, y);
+
+    ctx.font = "16px Arial";
+    ctx.fillText("👑", x, y - 12);
+  }
+
+  // 👻 NIGHTFOX
+  else if (skin === "nightfox") {
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 20;
+
+    ctx.globalAlpha = 0.4;
+    ctx.fillText("🦊", x, y);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.shadowBlur = 0;
 }
 }
 
