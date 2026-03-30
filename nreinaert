@@ -261,7 +261,7 @@ let selectedSkin = "basic";
 const shopItemsData = [
   { id: "basic", name: "basic", price: 0, type: "skin", emoji: "🦊" },
   { id: "kingfox", name: "Koningvos", price: 250, type: "skin", emoji: "👑" },
-  { id: "nightfox", name: "ghostvos", price: 150, type: "skin", emoji: "👻" }
+  { id: "nightfox", name: "geestvos", price: 150, type: "skin", emoji: "👻" }
 ];
   
   
