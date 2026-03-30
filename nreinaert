@@ -13,7 +13,17 @@
       align-items:center;
       height:100vh;
       flex-direction:column;
+      overflow: hidden;
     }
+    
+    #bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
 
     h2 {
       margin-bottom:5px;
@@ -103,6 +113,7 @@ button:hover {
   </style>
 </head>
 <body>
+    <canvas id="bg"></canvas>
 
 <h2>Reinaert Forest Survival</h2>
 
@@ -162,7 +173,7 @@ background: rgba(0,0,0,0.95); flex-direction:column; justify-content:center; ali
   </div>
 
   <!-- Power-ups sectie -->
-  <h3 style="margin-top:30px;">Trails</h3>
+  <h3 style="margin-top:30px;"></h3>
   <div id="powerupsRow" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
     <!-- power-up buttons worden hier via JS toegevoegd -->
   </div>
@@ -216,6 +227,39 @@ function listenLeaderboard() {
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+
+// 🌲 BACKGROUND BOS
+const bgCanvas = document.getElementById("bg");
+const bgCtx = bgCanvas.getContext("2d");
+
+function resizeBg() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resizeBg);
+resizeBg();
+
+// meerdere lagen voor depth
+let bgTreesBack = [];
+let bgTreesFront = [];
+
+// VERRE bomen (klein en licht)
+for (let i = 0; i < 40; i++) {
+  bgTreesBack.push({
+    x: Math.random() * bgCanvas.width,
+    y: Math.random() * bgCanvas.height,
+    size: Math.random() * 30 + 30
+  });
+}
+
+// DICHTBIJ bomen (groter en donkerder)
+for (let i = 0; i < 60; i++) {
+  bgTreesFront.push({
+    x: Math.random() * bgCanvas.width,
+    y: Math.random() * bgCanvas.height,
+    size: Math.random() * 60 + 60
+  });
+}
 
 let player, enemies = [], collectibles = [];
 let score = 0;
@@ -653,6 +697,7 @@ function spawnPowerup() {
 }
 
 function loop() {
+  drawBackground(); // 👈 deze MOET erboven
   update();
   draw();
   requestAnimationFrame(loop);
@@ -1223,6 +1268,44 @@ function drawSkinPreview(ctx, skin) {
 
   ctx.shadowBlur = 0;
 }
+}
+
+function drawBackground() {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  // achtergrond kleur
+  bgCtx.fillStyle = "#011a14";
+  bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  // 🌲 VERRE BOMEN
+  bgTreesBack.forEach(tree => {
+    bgCtx.fillStyle = "rgba(70,40,15,0.85)";
+    bgCtx.fillRect(tree.x, tree.y, 4, tree.size);
+
+    bgCtx.beginPath();
+    bgCtx.moveTo(tree.x - 15, tree.y);
+    bgCtx.lineTo(tree.x + 19, tree.y);
+    bgCtx.lineTo(tree.x + 2, tree.y - tree.size);
+    bgCtx.closePath();
+
+    bgCtx.fillStyle = "#083608";
+    bgCtx.fill();
+  });
+
+  // 🌲 VOORSTE BOMEN
+  bgTreesFront.forEach(tree => {
+    bgCtx.fillStyle = "rgba(90,60,30,0.95)";
+    bgCtx.fillRect(tree.x, tree.y, 6, tree.size);
+
+    bgCtx.beginPath();
+    bgCtx.moveTo(tree.x - 25, tree.y);
+    bgCtx.lineTo(tree.x + 31, tree.y);
+    bgCtx.lineTo(tree.x + 3, tree.y - tree.size);
+    bgCtx.closePath();
+
+    bgCtx.fillStyle = "#114711";
+    bgCtx.fill();
+  });
 }
 
 
