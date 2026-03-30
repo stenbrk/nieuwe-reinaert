@@ -121,7 +121,7 @@ button:hover {
   <div id="scoreDisplay">Score: 0 | Highscore: 0 | 🐤: 0</div>
 </div>
 
-<canvas id="game" width="400" height="400"></canvas>
+<canvas id="game" width="450" height="450"></canvas>
 
 <div id="overlay">
   <h1 id="titleText">Reinaert Forest Survival</h1>
@@ -131,7 +131,8 @@ button:hover {
 
   <label>
     🔊 Sound:
-    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+    <label for="volumeSlider">Volume:</label>
+<input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
   </label>
   
   <br><br>
@@ -244,7 +245,7 @@ let bgTreesBack = [];
 let bgTreesFront = [];
 
 // VERRE bomen (klein en licht)
-for (let i = 0; i < 40; i++) {
+for (let i = 0; i < 100; i++) {
   bgTreesBack.push({
     x: Math.random() * bgCanvas.width,
     y: Math.random() * bgCanvas.height,
@@ -253,7 +254,7 @@ for (let i = 0; i < 40; i++) {
 }
 
 // DICHTBIJ bomen (groter en donkerder)
-for (let i = 0; i < 60; i++) {
+for (let i = 0; i < 80; i++) {
   bgTreesFront.push({
     x: Math.random() * bgCanvas.width,
     y: Math.random() * bgCanvas.height,
@@ -277,7 +278,7 @@ let shieldActive = false;
 let shieldTimer = 0;
 
 let coinBombActive = false;
-let coinsInGame = 4;
+let coinsInGame = 5;
 let lastPowerupScore = 0;
 let powerupSpawnedFor20 = 0;
 let coinMultiplierActive = false;
@@ -341,16 +342,16 @@ const shopItemsData = [
 
   // 👻 NIGHTFOX (ghost)
   else if (skin === "nightfox") {
-    ctx.shadowColor = "black";
+    ctx.shadowColor = "white";  // witte schaduw in plaats van zwart
     ctx.shadowBlur = 20;
 
-    ctx.globalAlpha = 0.35;  // maakt hem doorzichtig
+    ctx.globalAlpha = 0.35;     // maakt hem doorzichtig
     ctx.font = "28px Arial";
     ctx.fillText("🦊", x, y);
 
-    ctx.globalAlpha = 1; // reset opacity
-  }
-
+    ctx.globalAlpha = 1;        // reset opacity
+    ctx.shadowBlur = 0;          // reset shadow zodat andere dingen geen glow krijgen
+}
   // reset shadow blur
   ctx.shadowBlur = 0;
 }
@@ -395,6 +396,17 @@ document.getElementById("volumeSlider").oninput = (e) => {
 document.getElementById("playerMode").onchange = (e) => {
   playerMode = e.target.value;
 };
+
+const music = document.getElementById("bgMusic");
+const volumeSlider = document.getElementById("volumeSlider");
+
+// Zet beginvolume
+music.volume = volumeSlider.value;
+
+// Luister naar veranderingen
+volumeSlider.addEventListener("input", () => {
+  music.volume = volumeSlider.value;
+});
 
 document.getElementById("shopBtn").onclick = () => openShop();
 
@@ -602,6 +614,18 @@ function startGame() {
   document.getElementById("overlay").style.display = "none";
 }
 
+function spawnPowerup() {
+  const margin = 10;
+  const type = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
+
+  collectibles.push({
+    x: margin + Math.random() * (canvas.width - 2*margin),
+    y: margin + Math.random() * (canvas.height - 2*margin),
+    r: 14,
+    type: type
+  });
+}
+
 function gameOver() {
   gameRunning = false;
 
@@ -617,7 +641,7 @@ function gameOver() {
   coinMultiplierTimer = 0;
 
   coinBombActive = false;
-  coinsInGame = 4;
+  coinsInGame = 5;
 
   if (score > highscore) highscore = score;
 
@@ -676,25 +700,23 @@ function updateLeaderboardUI() {
 }
 
 function spawnCollectible() {
-  let y = 100 + Math.random() * 280;
+  let margin = 50;
   collectibles.push({
-    x: Math.random() * 380,
-    y: y,
+    x: margin + Math.random() * (canvas.width - 2*margin),
+    y: margin + Math.random() * (canvas.height - 2*margin),
     r: 6
   });
 }
 
-function spawnPowerup() {
-  let y = 100 + Math.random() * 280;
-  let type = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
+let y = 100 + Math.random() * 280;
+let type = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
 
-  collectibles.push({
-    x: Math.random() * 380,
-    y: y,
-    r: 14,
-    type: type
-  });
-}
+collectibles.push({
+  x: Math.random() * 380,
+  y: y,
+  r: 14,
+  type: type
+});
 
 function loop() {
   drawBackground(); // 👈 deze MOET erboven
@@ -774,8 +796,8 @@ if (playerMode === "2" && player2) {
   player2.x += player2.vx;
   player2.y += player2.vy;
 
-  player2.x = Math.max(0, Math.min(400, player2.x));
-  player2.y = Math.max(0, Math.min(400, player2.y));
+  player2.x = Math.max(0, Math.min(450, player2.x));
+  player2.y = Math.max(0, Math.min(450, player2.y));
 }
 
   player.vx *= 0.9;
@@ -784,8 +806,8 @@ if (playerMode === "2" && player2) {
   player.x += player.vx;
   player.y += player.vy;
 
-  player.x = Math.max(0, Math.min(400, player.x));
-  player.y = Math.max(0, Math.min(400, player.y));
+  player.x = Math.max(0, Math.min(450, player.x));
+  player.y = Math.max(0, Math.min(450, player.y));
 
   spawnTimer += 16;
 
@@ -811,7 +833,7 @@ if (gameMode === "hard") {
   if (spawnTimer > spawnRate) {
   spawnTimer = 0;
 
-  let spawnX = Math.random() * 400;
+  let spawnX = Math.random() * 450;
   let spawnY = -20;
 
   let types = ["nobel", "bear", "wolf", "cat", "ram"];
@@ -882,9 +904,9 @@ enemies.push({
     if (coinBombActive) {
       coinsInGame--;
 
-      if (coinsInGame <= 4) {
+      if (coinsInGame <= 5) {
         coinBombActive = false;
-        coinsInGame = 4;
+        coinsInGame = 5;
       }
     }
   }
@@ -906,7 +928,7 @@ enemies.push({
   // COINBOMB
   if (c.type === "coinbomb") {
     coinBombActive = true;
-    coinsInGame = 14;
+    coinsInGame = 25;
     playBeep(200, 0.3, "square", 0.3);
   }
 
@@ -922,12 +944,14 @@ enemies.push({
 }
 
   // Altijd vullen tot coinsInGame
-while (collectibles.length < coinsInGame) spawnCollectible();
+while (collectibles.filter(c => c.type === "coin" || !c.type).length < Math.min(coinsInGame, 50)) {
+  spawnCollectible();
+}
 
 // Als coinBomb actief en alle coins gepakt
-if (coinBombActive && collectibles.length <= 3) {
+if (coinBombActive && collectibles.length <= 4) {
   coinBombActive = false;
-  coinsInGame = 4;
+  coinsInGame = 5;
 }
 
   document.getElementById("scoreDisplay").innerText =
@@ -944,7 +968,7 @@ particles = particles.filter(p => p.life > 0);
 
 function draw() {
   ctx.fillStyle = "#022c22";
-  ctx.fillRect(0,0,400,400);
+  ctx.fillRect(0,0,450,450);
   
   // PLAYER 1 🦊 (Reinaert)
 if (player) {
@@ -992,7 +1016,7 @@ else if (selectedSkin === "kingfox") {
 }
 
 else if (selectedSkin === "nightfox") {
-  ctx.shadowColor = "black";
+  ctx.shadowColor = "white";
 ctx.shadowBlur = 25;
 
 ctx.globalAlpha = 0.35; // maakt hem donkerder
