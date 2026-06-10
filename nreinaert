@@ -85,6 +85,10 @@ p{
     margin-bottom:10px;
 }
 
+html, body {
+    overflow: hidden;
+}
+
 #score,
 #highscore{
     font-size:20px;
